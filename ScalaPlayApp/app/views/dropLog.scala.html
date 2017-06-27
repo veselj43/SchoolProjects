@@ -1,0 +1,143 @@
+@(drops: Seq[DropLogData], stats: ((Int, Int, Int, Int, Int, Int), (Int, Int, Int, Int, Int, Int)), uid: Long)
+
+@dropRate(a: Int, b: Int) = @{
+	if (b > 0) "1/" + (a/b).toString
+	else "0"
+}
+
+@dry(a: Int) = @{
+	if (a > 0) a.toString
+	else "0"
+}
+
+@main("Drop log", "drops") {
+
+	<h1>Drop log</h1>
+
+	<form class="form-inline" id="add" action='@routes.DropLogController.addDropLog()' method="post">
+		<input type="hidden" name="log.user_id" value="@uid">
+		<!-- <div class="form-group">
+			<input type="date" class="form-control" id="date" placeholder="Date">
+		</div> -->
+		<div class="form-group">
+			<div class="radio">
+				<div><label>
+					<input type="radio" name="log.path_id" value="1"> Top
+				</label></div>
+				<div><label>
+					<input type="radio" name="log.path_id" value="2"> Mid
+				</label></div>
+				<div><label>
+					<input type="radio" name="log.path_id" value="3"> Bot
+				</label></div>
+			</div>
+		</div>
+		<div class="form-group">
+			<input type="number" class="form-control" name="log.kc" id="kills" placeholder="Kills">
+		</div>
+		<div class="form-group">
+			<div class="radio">
+				<div><label>
+					<input type="radio" name="itemIDs[0]" value="0" checked="checked"> None
+				</label></div>
+				<div><label>
+					<input type="radio" name="itemIDs[0]" value="4"> Leg
+				</label></div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="radio">
+				<div><label>
+					<input type="radio" name="itemIDs[1]" value="0" checked="checked"> None
+				</label></div>
+				<div><label>
+					<input type="radio" name="itemIDs[1]" value="1"> Eye
+				</label></div>
+				<div><label>
+					<input type="radio" name="itemIDs[1]" value="2"> Web
+				</label></div>
+				<div><label>
+					<input type="radio" name="itemIDs[1]" value="1"> Fang
+				</label></div>
+			</div>
+		</div>
+		<div class="form-group">
+			<button type="submit" class="btn btn-primary" id="addSubmit">Add</button>
+		</div>
+	</form>
+
+	<h2>Totals</h2>
+
+	<table class="table table-hover totals">
+		<thead>
+			<tr>
+				<th>Totals</th>
+				<th id="kc">@stats._1._1</th>
+				<th>Completely dry</th>
+				<th id="dry">@dry(stats._2._1)</th>
+			</tr>
+			<tr>
+				<th>Item</th>
+				<th>Count</th>
+				<th>Dry</th>
+				<th>Drop rate</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<th>Leg</th>
+				<td>@stats._1._2</td>
+				<td>@dry(stats._2._2)</td>
+				<td>@dropRate(stats._1._1, stats._1._2)</td>
+			</tr>
+			<tr>
+				<th>Eye</th>
+				<td>@stats._1._3</td>
+				<td>@dry(stats._2._3)</td>
+				<td>@dropRate(stats._1._1, stats._1._3)</td>
+			</tr>
+			<tr>
+				<th>Web</th>
+				<td>@stats._1._4</td>
+				<td>@dry(stats._2._4)</td>
+				<td>@dropRate(stats._1._1, stats._1._4)</td>
+			</tr>
+			<tr>
+				<th>Fang</th>
+				<td>@stats._1._5</td>
+				<td>@dry(stats._2._5)</td>
+				<td>@dropRate(stats._1._1, stats._1._5)</td>
+			</tr>
+			<tr>
+				<th>Hilts</th>
+				<td>@stats._1._6</td>
+				<td>@dry(stats._2._6)</td>
+				<td>@dropRate(stats._1._1, stats._1._6)</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<h2>Drops</h2>
+
+	<table class="table table-hover">
+		<thead>
+			<tr class="">
+				<th>Path</th>
+				<th>Kills</th>
+				<th>Drops</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+		@for(drop <- drops){
+			<tr>
+				<td>@drop.path.name</td>
+				<td>@drop.log.kc</td>
+				<td>@drop.items.map(_.map(_.name).getOrElse("---")).mkString(", ")</td>
+				<td><a href="@routes.DropLogController.deleteDropLog(drop.log.id)">delete</a></td>
+			</tr>
+		}
+		</tbody>
+	</table>
+
+}
